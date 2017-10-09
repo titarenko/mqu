@@ -40,7 +40,7 @@ process.on('SIGINT', () => {
 
 ## Why?
 
-Because best [RabbitMQ](https://www.rabbitmq.com/) client for [node.js](https://nodejs.org) is [bramqp](https://github.com/bakkerthehacker/bramqp), but it's too verbose to be used directly for:
+Because best [RabbitMQ](https://www.rabbitmq.com/) client for [node.js](https://nodejs.org) [bramqp](https://github.com/bakkerthehacker/bramqp) is too verbose to be used directly for:
 
 - round robin distribution of jobs between workers
 - fanout distribution of events to listeners
