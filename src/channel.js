@@ -124,7 +124,7 @@ class Channel {
             this.number,
             'basic',
             { 'content-type': 'application/json' },
-            JSON.stringify(content),
+            content === undefined ? '{}' : JSON.stringify(content),
             error => {
               if (error) {
                 reject(error)
@@ -150,7 +150,7 @@ class Channel {
       this.handle.once(`${this.number}:basic.consume-ok`, () => {
         this.handle.on(`${this.number}:basic.deliver`, (channel, method, data) => {
           this.handle.once('content', (channel, className, properties, content) => {
-            Promise.resolve().then(() => consumer(JSON.parse(content.toString())))
+            Promise.resolve().then(() => consumer(JSON.parse(content.toString() || '{}')))
               .then(() => this.handle.basic.ack(this.number, data['delivery-tag'], false))
               .catch(() => this.handle.basic.nack(this.number, data['delivery-tag'], false))
           })
