@@ -51,6 +51,7 @@ class Connection extends EventEmitter {
     }
     return this.handlePromise.then(handle => new Promise((resolve, reject) => {
       handle.closeAMQPCommunication(error => {
+        this.handlePromise = null
         if (error) {
           reject(error)
         } else {
