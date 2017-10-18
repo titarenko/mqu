@@ -152,7 +152,10 @@ class Channel {
           this.handle.once('content', (channel, className, properties, content) => {
             Promise.resolve().then(() => consumer(JSON.parse(content.toString() || '{}')))
               .then(() => this.handle.basic.ack(this.number, data['delivery-tag'], false))
-              .catch(() => this.handle.basic.nack(this.number, data['delivery-tag'], false))
+              .catch(error => {
+                this.handle.basic.nack(this.number, data['delivery-tag'], false)
+                throw error
+              })
           })
         })
       })
