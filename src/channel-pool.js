@@ -7,7 +7,9 @@ class ChannelPool {
     this.pool = genericPool.createPool({
       create: () => connection.getHandle().then(handle => {
         const channel = new Channel(handle, newChannelNumber++)
-        return channel.open().then(() => channel)
+        return channel.open()
+          .then(() => channel.qos(0, 1, false))
+          .then(() => channel)
       }),
       destroy: channel => channel.close(),
     }, {

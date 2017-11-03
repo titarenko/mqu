@@ -23,6 +23,13 @@ class Channel {
     })
   }
 
+  qos (size, count, global) {
+    return new Promise((resolve, reject) => {
+      this.handle.once(`${this.number}:basic.qos-ok`, resolve)
+      this.handle.basic.qos(this.number, size, count, global)
+    })
+  }
+
   declareExchange (name, {
     type = '',
     passive = false,
