@@ -1,4 +1,5 @@
 const bramqp = require('bramqp')
+const url = require('url')
 const { EventEmitter } = require('events')
 const { createConnection } = require('net')
 
@@ -63,14 +64,15 @@ class Connection extends EventEmitter {
   }
 
   parseConnectionString (connectionString = '') {
-    const [
-      user = 'guest',
-      password = 'guest',
-      host = 'localhost',
-      port = '5672',
-      vhost = '/',
-    ] = connectionString.slice(7).split(/[:@\\/]/).filter(Boolean)
-    return { user, password, host, port, vhost }
+    const { auth, hostname, port, pathname } = url.parse(connectionString)
+    const [user = 'guest', password = 'guest'] = auth ? auth.split(':') : []
+    return {
+      user,
+      password,
+      host: hostname || 'localhost',
+      port: port || '5672',
+      vhost: pathname ? pathname.slice(1) : '/',
+    }
   }
 }
 
