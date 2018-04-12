@@ -9,8 +9,8 @@ class Api extends EventEmitter {
       options = { connection: options }
     }
     this.options = Object.assign({
-      toExchangeName: name => name,
-      toQueueName: name => name,
+      toExchangeName: (...args) => args.join(':'),
+      toQueueName: (...args) => args.join(':'),
     }, options)
     this.connection = new Connection(this.options.connection)
     this.connection.on('error', error => this.emit('error', error))
@@ -29,11 +29,26 @@ class Api extends EventEmitter {
     )
   }
 
-  consumeEvent (name, consumer, options) {
+  consumeEvent (...args) {
+    return this.consumeTransientEvent(...args)
+  }
+
+  consumeTransientEvent (name, consumer, options) {
     const exchange = this.options.toExchangeName(name)
     return this.pool.acquire().then(channel =>
       channel.declareExchange(exchange, { type: 'fanout' })
         .then(() => channel.declareQueue('', { autoDelete: true }))
+        .then(data => channel.bindQueue(data.queue, exchange).then(() => data))
+        .then(data => channel.consume(data.queue, consumer, options))
+    )
+  }
+
+  consumePersistentEvent (eventName, consumerName, consumer, options) {
+    const exchange = this.options.toExchangeName(eventName)
+    const queue = this.options.toQueueName(eventName, consumerName)
+    return this.pool.acquire().then(channel =>
+      channel.declareExchange(exchange, { type: 'fanout' })
+        .then(() => channel.declareQueue(queue))
         .then(data => channel.bindQueue(data.queue, exchange).then(() => data))
         .then(data => channel.consume(data.queue, consumer, options))
     )

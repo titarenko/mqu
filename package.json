@@ -1,6 +1,6 @@
 {
   "name": "mqu",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Job and event distribution built on top of RabbitMQ.",
   "main": "index.js",
   "directories": {
