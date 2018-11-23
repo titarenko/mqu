@@ -23,9 +23,8 @@ class Connection extends EventEmitter {
 
   getHandle () {
     return this.handlePromise || (this.handlePromise = new Promise((resolve, reject) => {
-      const socket = this.options.tls
-        ? createSecureConnection(this.options)
-        : createConnection(this.options)
+      const connectionMethod = this.options.tls ? createSecureConnection : createConnection
+      const socket = connectionMethod(this.options.port, this.options.host)
       socket.on('error', error => this.emit('error', error))
       bramqp.initialize(socket, specification, (error, handle) => {
         if (error) {
@@ -73,7 +72,6 @@ class Connection extends EventEmitter {
     return {
       user,
       password,
-      servername: hostname || 'localhost',
       host: hostname || 'localhost',
       port: port || '5672',
       vhost: pathname ? pathname.slice(1) : '/',
