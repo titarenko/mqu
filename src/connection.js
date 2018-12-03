@@ -25,7 +25,7 @@ class Connection extends EventEmitter {
     return this.handlePromise || (this.handlePromise = new Promise((resolve, reject) => {
       const { tls, host, port } = this.options
       const connectionMethod = tls ? createSecureConnection : createConnection
-      const socket = connectionMethod(port, host)
+      const socket = connectionMethod({ port, host, servername: host })
       socket.on('error', error => this.emit('error', error))
       bramqp.initialize(socket, specification, (error, handle) => {
         if (error) {
