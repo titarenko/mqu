@@ -1,5 +1,8 @@
-class Channel {
+const EventEmitter = require('events')
+
+class Channel extends EventEmitter {
   constructor (handle, number) {
+    super()
     this.handle = handle
     this.number = number
   }
@@ -18,6 +21,7 @@ class Channel {
 
   close () {
     return new Promise((resolve, reject) => {
+      this.removeAllListeners()
       this.handle.once(`${this.number}:close-ok`, resolve)
       this.handle.channel.close(this.number, 200, 'normal clearing')
     })
@@ -161,7 +165,7 @@ class Channel {
               .then(() => this.handle.basic.ack(this.number, data['delivery-tag'], false))
               .catch(error => {
                 this.handle.basic.nack(this.number, data['delivery-tag'], false)
-                throw error
+                this.emit('error', error)
               })
           })
         })

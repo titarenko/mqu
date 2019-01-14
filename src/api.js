@@ -15,6 +15,7 @@ class Api extends EventEmitter {
     this.connection = new Connection(this.options.connection)
     this.connection.on('error', error => this.emit('error', error))
     this.pool = new ChannelPool(this.connection)
+    this.pool.on('error', error => this.emit('error', error))
   }
 
   close () {

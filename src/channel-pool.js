@@ -1,12 +1,15 @@
+const EventEmitter = require('events')
 const Channel = require('./channel')
 const genericPool = require('generic-pool')
 
-class ChannelPool {
+class ChannelPool extends EventEmitter {
   constructor (connection) {
+    super()
     let newChannelNumber = 2
     this.pool = genericPool.createPool({
       create: () => connection.getHandle().then(handle => {
         const channel = new Channel(handle, newChannelNumber++)
+        channel.on('error', error => this.emit('error', error))
         return channel.open()
           .then(() => channel.qos(0, 1, false))
           .then(() => channel)
