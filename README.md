@@ -9,9 +9,14 @@ npm i mqu
 ```js
 const mqu = require('mqu')('amqp://guest:guest@localhost:5672')
 
+
 mqu.on('error', error => {
   console.error('oh my, error!!', error)
   process.kill(process.pid)
+})
+
+mqu.on('connect',  () => {
+  console.error('oh my, connect!!')
 })
 
 mqu.consumeJob('j', data => console.log('worker 1', data))
@@ -37,6 +42,21 @@ process.on('SIGINT', () => {
   mqu.close().then(() => console.log('closed!'))
 })
 ```
+
+## Events
+- `error` - emitted when something is wrong
+
+	When:
+	- `socket for bramqp` emitted `error` event
+	- `bramqp` emitted `error` event
+	- `bramqp` emitted `connection.close` event
+	- `bramqp` emitted `channel.close` event 
+
+- `connect` - emitted when a connection with `rabbitmq` is established
+
+	When:
+	- `bramqp` emitted `connection.open-ok` event. 
+	
 
 ## Why?
 
