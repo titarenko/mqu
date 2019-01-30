@@ -9,7 +9,7 @@ mqu.on('error', error => {
   process.kill(process.pid)
 })
 mqu.on('connect', (...args) => {
-	console.log('oh my, connect', ...args)
+	console.log('connect method succeeded', ...args)
 })
 
 mqu.consumeJob('j', data => console.log('worker 1', data))
