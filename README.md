@@ -14,6 +14,10 @@ mqu.on('error', error => {
   process.kill(process.pid)
 })
 
+mqu.on('connect',  () => {
+  console.error('connect method succeeded')
+})
+
 mqu.consumeJob('j', data => console.log('worker 1', data))
 mqu.consumeJob('j', data => console.log('worker 2', data))
 
@@ -37,6 +41,10 @@ process.on('SIGINT', () => {
   mqu.close().then(() => console.log('closed!'))
 })
 ```
+
+## Events
+- `error` - emitted when transport, protocol or consumer error is occurred 
+- `connect` - emitted when a protocol level connection is ready
 
 ## Why?
 

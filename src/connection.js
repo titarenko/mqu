@@ -32,6 +32,7 @@ class Connection extends EventEmitter {
           return reject(error)
         }
         handle.on('error', error => this.emit('error', error))
+        handle.on('connection.open-ok', (...args) => this.emit('connect', ...args))
         handle.on('connection.close', (channel, method, data) => {
           this.emit('error', new AmqpError(data))
         })
