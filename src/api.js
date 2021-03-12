@@ -41,6 +41,7 @@ class Api extends EventEmitter {
       channel.declareExchange(exchange, { type: 'fanout' })
         .then(() => channel.declareQueue('', { autoDelete: true }))
         .then(data => channel.bindQueue(data.queue, exchange).then(() => data))
+        .then(configureQos(channel, options))
         .then(data => channel.consume(data.queue, consumer, options))
     )
   }
@@ -52,6 +53,7 @@ class Api extends EventEmitter {
       channel.declareExchange(exchange, { type: 'fanout' })
         .then(() => channel.declareQueue(queue))
         .then(data => channel.bindQueue(data.queue, exchange).then(() => data))
+        .then(configureQos(channel, options))
         .then(data => channel.consume(data.queue, consumer, options))
     )
   }
@@ -68,9 +70,21 @@ class Api extends EventEmitter {
     const queue = this.options.toQueueName(name)
     return this.pool.acquire().then(channel =>
       channel.declareQueue(queue)
+        .then(configureQos(channel, options))
         .then(() => channel.consume(queue, consumer, options))
     )
   }
 }
 
 module.exports = Api
+
+function configureQos (channel, options) {
+  return data => {
+    if (options && options.qos) {
+      return channel
+        .qos(options.qos.size || 0, options.qos.count, options.qos.global || false)
+        .then(() => data)
+    }
+    return data
+  }
+}
