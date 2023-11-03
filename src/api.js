@@ -37,9 +37,10 @@ class Api extends EventEmitter {
 
   consumeTransientEvent (name, consumer, options) {
     const exchange = this.options.toExchangeName(name)
+    const args = options && options.args
     return this.pool.acquire().then(channel =>
       channel.declareExchange(exchange, { type: 'fanout' })
-        .then(() => channel.declareQueue('', { autoDelete: true }))
+        .then(() => channel.declareQueue('', Object.assign({ autoDelete: true }, args && { args })))
         .then(data => channel.bindQueue(data.queue, exchange).then(() => data))
         .then(configureQos(channel, options))
         .then(data => channel.consume(data.queue, consumer, options))
@@ -49,9 +50,10 @@ class Api extends EventEmitter {
   consumePersistentEvent (eventName, consumerName, consumer, options) {
     const exchange = this.options.toExchangeName(eventName)
     const queue = this.options.toQueueName(eventName, consumerName)
+    const args = options && options.args
     return this.pool.acquire().then(channel =>
       channel.declareExchange(exchange, { type: 'fanout' })
-        .then(() => channel.declareQueue(queue))
+        .then(() => channel.declareQueue(queue, args && { args }))
         .then(data => channel.bindQueue(data.queue, exchange).then(() => data))
         .then(configureQos(channel, options))
         .then(data => channel.consume(data.queue, consumer, options))
@@ -60,16 +62,18 @@ class Api extends EventEmitter {
 
   publishJob (name, content, options) {
     const queue = this.options.toQueueName(name)
+    const args = options && options.args
     return this.pool.use(channel =>
-      channel.declareQueue(queue)
+      channel.declareQueue(queue, args && { args })
         .then(() => channel.publish('', content, { routingKey: queue }))
     )
   }
 
   consumeJob (name, consumer, options) {
     const queue = this.options.toQueueName(name)
+    const args = options && options.args
     return this.pool.acquire().then(channel =>
-      channel.declareQueue(queue)
+      channel.declareQueue(queue, args && { args })
         .then(configureQos(channel, options))
         .then(() => channel.consume(queue, consumer, options))
     )
